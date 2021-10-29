@@ -1,3 +1,5 @@
+' Děti, neberte drogy a nedělejte s vba, nestojí to za to...
+
 VERSION 1.0 CLASS
 BEGIN
   MultiUse = -1  'True

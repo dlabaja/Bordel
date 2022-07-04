@@ -1,72 +1,56 @@
 use std::io::*;
 use rand::Rng;
-use lazy_static::lazy_static;
-use std::sync::{Mutex, MutexGuard};
-
-lazy_static! {static ref RND: Mutex<i32> = Mutex::new(0);
-    static ref GUESS : Mutex<i32> = Mutex::new(0);}
+use std::cmp::Ordering;
+use std::cmp::Ordering::Less;
 
 fn main() {
-    let mut wanna_play = true;
-    while wanna_play {
+    println!("Let's play a number guessing game!");
+    loop {
         game();
         println!("Wanna play again? (Y/n)");
-        if read_input().to_lowercase() == "n" {
-            wanna_play = false;
+        if read_input().trim().to_lowercase() == "n" {
+            std::process::exit(0);
         }
     }
 }
 
-fn game(){
-    *get_guess() = 0;
-    *get_rnd() = rand::thread_rng().gen_range(1..100);
+fn game() {
+    let mut guess = 0;
+    let rnd = rand::thread_rng().gen_range(1..101);
     println!("Write down a number from 1 to 100");
-    while *get_guess() != *get_rnd(){
-        if parse_int(read_input()) {
-            if *get_guess() == *get_rnd() {
-                //guess is right
+
+    while guess != rnd {
+        guess = parse_int(read_input());
+        if guess == 0 { continue; }
+
+        match guess.cmp(&rnd) {
+            Less => println!("Too small!"),
+            Ordering::Greater => println!("Too big!"),
+            Ordering::Equal => {
+                println!("You win!");
                 break;
             }
-            //guess is higher/lower
-            println!("{}", generate_string(*GUESS.lock().unwrap()));
-        }
+        };
     }
-    println!("You won!")
 }
 
-fn get_guess() -> MutexGuard<'static, i32> {
-    return GUESS.lock().unwrap();
-}
-
-fn get_rnd() -> MutexGuard<'static, i32> {
-    return RND.lock().unwrap();
-}
-
-fn generate_string(guess: i32) -> &'static str {
-    if guess > *get_rnd() {
-        return "Too high!";
-    }
-    return "Too low!";
-}
-
-fn parse_int(input: String) -> bool {
+fn parse_int(input: String) -> i32 {
     return match input.trim().parse::<i32>() {
         Ok(i) => {
-            if i < 1 || i > 100 {
+            if !(1..101).contains(&i) {
                 println!("The number has to be from 1 to 100");
-                return false;
+                return 0;
             }
-            *get_guess() = i;
-            true
+            i
         }
-        Err(..) => {
+        Err(_) => {
             println!("Invalid number");
-            false
+            0
         }
     };
 }
 
-fn read_input() -> String{
+fn read_input() -> String {
     let mut input = String::new();
     stdin()
         .read_line(&mut input).unwrap();

@@ -9,4 +9,4 @@ Soubory:
 - **Macro.py** - To samé, ale pro LibreOffice Calc (Python)
 - **Main.rs** - Úvodní program do Rustu (Rust (překvapivě))
 - **Microbit text editor** - Název mluví sám za sebe (MicroPython)
-- **Sussus generátorus** - Přidá k jakémukoliv slovu sus (okno -> oknus) (nesuďte mě pls)
+- **Sussus generátorus** - Přidá k jakémukoliv slovu sus (okno -> oknus) (nesuďte mě pls) (C#)

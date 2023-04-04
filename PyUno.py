@@ -25,8 +25,6 @@
 # """
 import random
 
-# todo hraci + pc
-
 class color:
     black = "\u001b[30m"
     red = "\u001b[31m"
@@ -57,7 +55,7 @@ Zadej svou volbu: """))
     elif volba == 2:
         hra()
     elif volba == 3:
-        return
+        exit()
     else:
         print("Neplatná volba, musí být číslo od 1 do 3")
         menu()
@@ -75,10 +73,10 @@ index = -1
 def hra():
     clear_screen()
 
-    global deck
+    global balicek
     balicek = vygeneruj_karty()
 
-    global players
+    global hraci
     for i in range(verfify_input("Zadejte počet hráčů: ")):
         hraci.update({f"Hráč #{i + 1}": []})
         vzit_z_balicku(7, hraci[f"Hráč #{i + 1}"])
@@ -90,13 +88,14 @@ def hra():
     log = []
 
     global stul
-    stul += vzit_z_balicku(1, stul)
+    stul = vzit_z_balicku(1, stul)
     while color.black in stul[-1]:
         stul += vzit_z_balicku(1, stul)
 
     while True:
         for i in range(len(hraci)):
             global current_player
+            global index
             index = (index + smer) % len(hraci)
             hrac = list(hraci.items())[index][0]
 
@@ -144,13 +143,13 @@ def tah(karty):
     # hrac dobira
     if karta is None:
         write_log(
-            f"{color.bold}{current_player}{color.none} dobral kartu. Počet karet na ruce: {color.bold}{len(players[current_player])}{color.none}\n")
+            f"{color.bold}{current_player}{color.none} dobral kartu. Počet karet na ruce: {color.bold}{len(hraci[current_player])}{color.none}\n")
         return
 
     # hrac zastaven STOP kartou
     if karta == "STOP":
         write_log(
-            f"{color.bold}{current_player}{color.none} byl zastaven. Počet karet na ruce: {color.bold}{len(players[current_player])}{color.none}\n")
+            f"{color.bold}{current_player}{color.none} byl zastaven. Počet karet na ruce: {color.bold}{len(hraci[current_player])}{color.none}\n")
         input_hrac("Byl jste zastaven, jedno kolo nejedete ")
         return
     if "PC" in current_player: clear_screen()
@@ -160,7 +159,7 @@ def tah(karty):
 
     dat_na_stul(karta, karty)
     write_log(
-        f"{color.bold}{current_player}{color.none} zahrál {karta}. Počet karet na ruce: {color.bold}{len(players[current_player])}{color.none}\n")
+        f"{color.bold}{current_player}{color.none} zahrál {karta}. Počet karet na ruce: {color.bold}{len(hraci[current_player])}{color.none}\n")
     return karta
 
 def get_symbol(karta):
@@ -178,7 +177,7 @@ def end_game():
 def dat_na_stul(karta, lst):
     if karta is None:
         return
-    global table
+    global stul
     stul.append(karta)
     lst.remove(find_match(lst, karta, ["BARVA", "+4"]))
 
@@ -205,7 +204,7 @@ def vyber_kartu(karty):
         else:
             s += f"{color.gray}{i + 1}){karty[i]}{color.none}  "
 
-    print(f"""Stůl: {table[len(table) - 1]}
+    print(f"""Stůl: {stul[len(stul) - 1]}
 Karty: {s}""")
 
     if len(volba) == 1:  # není co hrát, ber karty
@@ -257,8 +256,8 @@ def verfify_input(msg):
 def hratelna_karta(karta):
     barva_karta = get_color(karta)
     symbol_karta = get_symbol(karta)
-    barva_stul = get_color(table[len(table) - 1])
-    symbol_stul = get_symbol(table[len(table) - 1])
+    barva_stul = get_color(stul[len(stul) - 1])
+    symbol_stul = get_symbol(stul[len(stul) - 1])
     if barva_karta == barva_stul or symbol_karta == symbol_stul or barva_karta == color.black:
         if len(plus_card_buffer) > 0 and ("+4" not in karta and "+2" not in karta):
             return False
@@ -269,7 +268,7 @@ def hratelna_karta(karta):
 
 def zmenit_barvu(jmeno_karty):
     if "PC" in current_player:
-        return f"{dominantni_barva(players[current_player])}{jmeno_karty}{color.none}"
+        return f"{dominantni_barva(hraci[current_player])}{jmeno_karty}{color.none}"
     vstup = verfify_input(f"""Zadejte barvu, na kterou chcete změnit
 {color.red}1 {color.blue}2 {color.green}3 {color.yellow}4{color.none}: """)
     volba = {1: color.red, 2: color.blue, 3: color.green, 4: color.yellow}
@@ -287,8 +286,8 @@ def dominantni_barva(karty):
     return [k for k, v in barvy.items() if v == max(barvy.values())][0]
 
 def vzit_z_balicku(num, karty):
-    global deck
-    ls = balicek[:int(num)]
+    global balicek
+    ls = balicek[:num]
     balicek = balicek[num:]
     karty += ls
     return ls

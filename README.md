@@ -2,6 +2,7 @@
 Malé prográmky, co si nezaslouží vlastní složku aneb ok každého trochu
 
 Soubory:
+- **Postfix Calculator** - Kalkulačka v postfixové notaci s převodníkem
 - **Algebrogram** - Počítá algebrogramy (např. koza^2 = antilopa)
 - **PyUno** - Uno v terminálu, podporuje barvy (Python)
 - **Tic Tac Toe** - Piškvorky v terminálu (C#)

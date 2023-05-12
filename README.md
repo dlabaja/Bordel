@@ -1,5 +1,5 @@
 # Bordel
-Malé prográmky, co si nezaslouží vlastní složku aneb ok každého trochu
+Malé prográmky, které si nezaslouží vlastní složku, aneb od každého trochu
 
 Soubory:
 - **Postfix Calculator** - Kalkulačka v postfixové notaci s převodníkem

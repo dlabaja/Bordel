@@ -15,11 +15,14 @@ namespace PostfixCalculator
 		public void InitDict() => operations = new Dictionary<string, Func<double>>()
 		{
 			{ "+", () => buffer.Pop() + buffer.Pop()},
-			{ "-", () => buffer.Pop() - buffer.Pop()},
+			{ "-", () => {
+				var num2 = buffer.Pop();
+				var num1 = buffer.Pop();
+				return num1 - num2; } },
 			{ "*", () => buffer.Pop() * buffer.Pop()},
 			{ "/", () => {
-				var num1 = buffer.Pop();
 				var num2 = buffer.Pop();
+				var num1 = buffer.Pop();
 				if (num2 == 0) throw new Exception("Math error");
 				return num1 / num2; }
 				},
@@ -28,8 +31,8 @@ namespace PostfixCalculator
 			{ "cos", () => Math.Cos(buffer.Pop())},
 			{ "tg", () => Math.Sin(buffer.Pop())},
 			{ "cotg", () => {
-				var num1 = buffer.Pop();
 				var num2 = buffer.Pop();
+				var num1 = buffer.Pop();
 				if (num2 == 0) throw new Exception("Math error");
 				return Math.Cos(num1) / Math.Sin(num2); } },
 			{ "pow", () => Math.Pow(buffer.Pop(), 2)},
@@ -55,12 +58,18 @@ namespace PostfixCalculator
 			try
 			{
 				InitDict();
-				for (int i = 0; i < commands.Length; i++)
+				foreach (var item in commands)				
 				{
-					if (operations.ContainsKey(Convert.ToString(commands[i])))
-						buffer.Push(operations[Convert.ToString(commands[i])]());
+					if (operations.ContainsKey(Convert.ToString(item)))
+						buffer.Push(operations[Convert.ToString(item)]());
 					else
-						buffer.Push(Convert.ToDouble(commands[i]));
+						try { 
+						buffer.Push(Convert.ToDouble(item));
+						}
+						catch
+						{
+							throw new Exception("Invalid Syntax");
+						}
 				}
 				if (buffer.Count > 1)
 					throw new Exception("Invalid Syntax");

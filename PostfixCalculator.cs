@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
@@ -11,7 +11,6 @@ namespace PostfixCalculator
 	{
 		Stack<double> buffer = new Stack<double>();
 		Dictionary<string, Func<double>> operations;
-		private bool _mathError;
 
 		public void InitDict() => operations = new Dictionary<string, Func<double>>()
 		{
@@ -21,7 +20,7 @@ namespace PostfixCalculator
 			{ "/", () => {
 				var num1 = buffer.Pop();
 				var num2 = buffer.Pop();
-				if (num2 == 0) _mathError = true;
+				if (num2 == 0) throw new Exception("Math error");
 				return num1 / num2; }
 				},
 			{ "%", () => buffer.Pop() % buffer.Pop()},
@@ -31,40 +30,48 @@ namespace PostfixCalculator
 			{ "cotg", () => {
 				var num1 = buffer.Pop();
 				var num2 = buffer.Pop();
-				if (num2 == 0) _mathError = true;
+				if (num2 == 0) throw new Exception("Math error");
 				return Math.Cos(num1) / Math.Sin(num2); } },
 			{ "pow", () => Math.Pow(buffer.Pop(), 2)},
 			{ "sqrt", () =>{
 				var num = buffer.Pop();
-				if (num < 0) _mathError = true;
+				if (num < 0) throw new Exception("Math error");
 				return Math.Sqrt(num); } },
 			{ "log", () => {
 				var num = buffer.Pop();
-				if (num <= 0) _mathError = true;
+				if (num <= 0) throw new Exception("Math error");
 				return Math.Log10(num); }},
 			{ "ln", () => {
 				var num = buffer.Pop();
-				if (num <= 0) _mathError = true;
+				if (num <= 0) throw new Exception("Math error");
 				return Math.Log(num); }},
 			{ "abs", () => Math.Abs(buffer.Pop())},
 			{ "π", () => Math.PI},
 			{ "e", () => Math.E}
 		};
 
-		public double Calculate(dynamic[] commands)
+		public object Calculate(dynamic[] commands)
 		{
-			InitDict();
-			for (int i = 0; i < commands.Length; i++)
+			try
 			{
-				if (operations.ContainsKey(Convert.ToString(commands[i])))
-					buffer.Push(operations[Convert.ToString(commands[i])]());
-				else
-					buffer.Push(Convert.ToDouble(commands[i]));
+				InitDict();
+				for (int i = 0; i < commands.Length; i++)
+				{
+					if (operations.ContainsKey(Convert.ToString(commands[i])))
+						buffer.Push(operations[Convert.ToString(commands[i])]());
+					else
+						buffer.Push(Convert.ToDouble(commands[i]));
+				}
+				if (buffer.Count > 1)
+					throw new Exception("Invalid Syntax");
+			}
+			catch (Exception e)
+			{
+				return e.Message;
 			}
 			return buffer.Pop();
 		}
 
-		//infix musí obsahovat mezery
 		public dynamic[] InfixToPostfix(string infix)
 		{
 			InitDict();

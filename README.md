@@ -2,6 +2,7 @@
 Malé prográmky, které si nezaslouží vlastní složku, aneb od každého trochu
 
 Soubory:
+- **PostfixCalc UnitTest** - UnitTest ke kalkulačce
 - **Postfix Calculator** - Kalkulačka v postfixové notaci s převodníkem
 - **Algebrogram** - Počítá algebrogramy (např. koza^2 = antilopa)
 - **PyUno** - Uno v terminálu, podporuje barvy (Python)

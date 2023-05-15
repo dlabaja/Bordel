@@ -43,7 +43,7 @@ namespace PostfixCalculator
 			},
 			{"sin", () => Math.Sin(_buffer.Pop())},
 			{"cos", () => Math.Cos(_buffer.Pop())},
-			{"tg", () => Math.Sin(_buffer.Pop())},
+			{"tg", () => Math.Tan(_buffer.Pop())},
 			{
 				"cotg", () =>
 				{

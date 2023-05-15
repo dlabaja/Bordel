@@ -1,0 +1,47 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
+using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
+using System.Text;
+
+namespace PostfixCalculator_UnitTest
+{
+	[TestClass]
+	public class UnitTest1
+	{
+		private Dictionary<string, string> tests = new Dictionary<string, string>()
+		{
+			{ "2+3*4", "14" },
+			{ "(8-5)/2", "1.5" },
+			{ "abs(-4)+sqrt(9)", "7" },
+			{ "pow(2)-1", "3" },
+			{ "sin(π/2)*cos(π)", "-1" },
+			{ "10 % 3", "1" },
+			{ "e * ln(e)", "2.71828182845905" },
+			{ "10/0", "Cannot divide by zero" },
+			{ "2.6/2", "1.3" },
+			{ "π*π", "9.86960440108934" },
+			{ "π+(π/e)", "4.29732000338071" },
+			{ "cotg(98)", "1.42887015672017" },
+			{ "pow(9", "Invalid Syntax" },
+			{ "8.....1", "Invalid Syntax" },
+			{ "65*32", "2080" },
+			{ "9%8", "1" },
+			{ "ln(9)", "2.19722457733622" },
+		};
+
+		[TestMethod]
+		public void TestCalc()
+		{
+			foreach (var item in tests)
+			{
+				Calculate(item.Key, item.Value);
+			}
+		}
+
+		private void Calculate(string infix, string result)
+		{
+			Assert.AreEqual(result, new PostfixCalculator.PostfixCalculator().CalculatePostfix(new PostfixCalculator.PostfixCalculator().InfixToPostfix(new StringBuilder(infix))).ToString());
+		}
+	}
+}

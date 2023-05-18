@@ -1,7 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
-using System.Runtime.Remoting.Messaging;
+using System.Globalization;
 using System.Text;
 
 namespace PostfixCalculator_UnitTest
@@ -9,39 +9,156 @@ namespace PostfixCalculator_UnitTest
 	[TestClass]
 	public class UnitTest1
 	{
-		private Dictionary<string, string> tests = new Dictionary<string, string>()
+		const string syntaxExc = "Invalid syntax";
+		const string lnExc = "Ln() cannot be ≤ 0";
+		const string logExc = "Log() cannot be ≤ 0";
+		const string sqrtExc = "Sqrt() cannot be < 0";
+		const string cotgExc = "Cotg() cannot be zero";
+		const string divZeroExc = "Cannot divide by zero";
+		const string moduloExc = "Cannot modulo by zero";
+		double tolerance = 0.0000000000000100;
+
+		private Dictionary<string, object> addition = new Dictionary<string, object>()
 		{
-			{ "2+3*4", "14" },
-			{ "(8-5)/2", "1.5" },
-			{ "abs(-4)+sqrt(9)", "7" },
-			{ "pow(2)-1", "3" },
-			{ "sin(π/2)*cos(π)", "-1" },
-			{ "10 % 3", "1" },
-			{ "e * ln(e)", "2.71828182845905" },
-			{ "10/0", "Cannot divide by zero" },
-			{ "2.6/2", "1.3" },
-			{ "π*π", "9.86960440108934" },
-			{ "π+(π/e)", "4.29732000338071" },
-			{ "cotg(98)", "1.42887015672017" },
-			{ "pow(9", "Invalid Syntax" },
-			{ "8.....1", "Invalid Syntax" },
-			{ "65*32", "2080" },
-			{ "9%8", "1" },
-			{ "ln(9)", "2.19722457733622" },
+			{"3+4", 7 },
+			{"3.+4", 7},
+			{"3.+4.", 7 },
+			{"+3+4.", syntaxExc },
+			{"3+4+5", 12 },
+			{"3.1+4.2", 7.3 },
+			{"3.1+4.2+5.3", 12.6 },
+			{"-3.1+4.2+5.3", 6.4 }
+		};
+
+		private Dictionary<string, object> substitution = new Dictionary<string, object>()
+		{
+			{"3-4", -1 },
+			{"3.-4", -1},
+			{"3.-4.", -1 },
+			{"+3-4.", syntaxExc },
+			{"-3-4.", -7 },
+			{"3-4-5", -6 },
+			{"3.1-4.2", -1.1 },
+			{"3.1-4.2-5.3", -6.4 },
+			{"-3.1-4.2-5.3", -12.6 }
+		};
+
+		private Dictionary<string, object> multiplication = new Dictionary<string, object>()
+		{
+			{"3*4", 12 },
+			{"3.*4", 12},
+			{"3.*4.", 12 },
+			{"+3*4.", syntaxExc },
+			{"*3*4.", syntaxExc },
+			{"-3*4.", -12 },
+			{"3*4*5", 60 },
+			{"3.1*4.2", 13.02 },
+			{"3.1-4.2*5.3", -19.16 },
+			{"-3.1-4.2*5.3", -25.36 }
+		};
+
+		private Dictionary<string, object> division = new Dictionary<string, object>()
+		{
+			{"3/4", 0.75 },
+			{"3./4", 0.75},
+			{"-3./4.", -0.75 },
+			{"+3/4.", syntaxExc },
+			{"*3/4.", syntaxExc },
+			{"3/0", divZeroExc },
+			{"3/4/5", 0.15 },
+			{"3.5/1.75", 2 },
+			{"3.1-3.5/1.75", 1.1 },
+			{"-3.1-3.5/1.75", -5.1 }
+		};
+
+		private Dictionary<string, object> brackeys = new Dictionary<string, object>()
+		{
+			{"(3/4)", 0.75 },
+			{"3./(4)", 0.75},
+			{"(-3.)/4.", -0.75 },
+			{"-(3./4)", -0.75 },
+			{"-(-3./4)", 0.75 },
+			{"3(4.", syntaxExc },
+			{")3/4.", 0.75 },
+			{"3/()", syntaxExc },
+			{"(3+4)/5", 1.4 }
+		};
+
+		private Dictionary<string, object> funcs = new Dictionary<string, object>()
+		{
+			{"9%5", 4 },
+			{"9%0", moduloExc },
+			{"pow(89)", 7921 },
+			{"pow(-9)", 81 },
+			{"-(pow(-9))", -81 },
+			{"sqrt(9", syntaxExc },
+			{"sqrt(9)", 3 },
+			{"sqrt(-9)", sqrtExc },
+			{"sqrt(0)", 0 },
+			{"log(100)", 2 },
+			{"log(0)", logExc },
+			{"log(-5)", logExc },
+			{"ln(e)", 1 },
+			{"ln(0)", lnExc },
+			{"ln(-5)", lnExc },
+			{"abs(9)", 9 },
+			{"abs(-9)", 9 },
+			{"sin(π/2)", 1 },
+			{"cos(π)", -1 },
+			{"tg(0)", 0 },
+			{"cotg(0)", cotgExc },
+			{"sin(π)+cos(0)*abs(9)", 9 },
 		};
 
 		[TestMethod]
-		public void TestCalc()
+		public void TestAddition()
+		{
+			Calculate(addition);
+		}
+
+		[TestMethod]
+		public void TestSubstitution()
+		{
+			Calculate(substitution);
+		}
+
+		[TestMethod]
+		public void TestMultiplication()
+		{
+			Calculate(multiplication);
+		}
+
+		[TestMethod]
+		public void TestDivision()
+		{
+			Calculate(division);
+		}
+
+		[TestMethod]
+		public void TestBrackeys()
+		{
+			Calculate(brackeys);
+		}
+
+		[TestMethod]
+		public void TestFuncs()
+		{
+			Calculate(funcs);
+		}
+
+		private void Calculate(Dictionary<string, object> tests)
 		{
 			foreach (var item in tests)
 			{
-				Calculate(item.Key, item.Value);
+				if (double.TryParse(item.Value.ToString(), out var d))
+				{
+					Assert.AreEqual(d, new PostfixCalculator.PostfixCalculator().CalculatePostfix(new PostfixCalculator.PostfixCalculator().InfixToPostfix(new StringBuilder(item.Key))), tolerance);
+				}
+				else
+				{
+					Assert.AreEqual(Assert.ThrowsException<Exception>(() => new PostfixCalculator.PostfixCalculator().CalculatePostfix(new PostfixCalculator.PostfixCalculator().InfixToPostfix(new StringBuilder(item.Key)))).Message, item.Value.ToString());
+				}
 			}
-		}
-
-		private void Calculate(string infix, string result)
-		{
-			Assert.AreEqual(result, new PostfixCalculator.PostfixCalculator().CalculatePostfix(new PostfixCalculator.PostfixCalculator().InfixToPostfix(new StringBuilder(infix))).ToString());
 		}
 	}
 }

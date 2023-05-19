@@ -16,6 +16,7 @@ namespace PostfixCalculator_UnitTest
 		const string cotgExc = "Cotg() cannot be zero";
 		const string divZeroExc = "Cannot divide by zero";
 		const string moduloExc = "Cannot modulo by zero";
+		const string emptyExc = "Empty expression";
 		double tolerance = 0.0000000000000100;
 
 		private Dictionary<string, object> addition = new Dictionary<string, object>()
@@ -110,6 +111,11 @@ namespace PostfixCalculator_UnitTest
 			{"sin(π)+cos(0)*abs(9)", 9 },
 		};
 
+		private Dictionary<string, object> others = new Dictionary<string, object>()
+		{
+			{"", emptyExc },
+		};
+
 		[TestMethod]
 		public void TestAddition()
 		{
@@ -144,6 +150,12 @@ namespace PostfixCalculator_UnitTest
 		public void TestFuncs()
 		{
 			Calculate(funcs);
+		}
+
+		[TestMethod]
+		public void TestOthers()
+		{
+			Calculate(others);
 		}
 
 		private void Calculate(Dictionary<string, object> tests)

@@ -2,6 +2,7 @@
 Malé prográmky, které si nezaslouží vlastní složku, aneb od každého trochu
 
 Soubory:
+- **Brainfuck** - Brainfuck interpreter v C#
 - **ip.ods** - IP počítadlo v LibreOffice Calc
 - **Publish.sh** - Shell script pro publikování dotnet projektů
 - **PostfixCalc UnitTest** - UnitTest ke kalkulačce
